@@ -6,8 +6,8 @@ This repository is a purpose-built example for the Agent Relay x Ratify Phase 2 
 
 ## Contents
 
-- [Getting started](./getting-started.md) — run the example end to end in a few minutes.
-- [Install](./guides/install.md) — dependencies and setup.
+- [Getting started](./getting-started.md): run the example end to end in a few minutes.
+- [Install](./guides/install.md): dependencies and setup.
 
 ## What it demonstrates
 

@@ -1,7 +1,8 @@
 /**
  * Phase 2 engagement harness.
  *
- * Replays the five scenes and re-verifies every published claim offline. This
+ * Replays the engagement scenes (delegation, handoff, the offline federation model, the work
+ * with receipts, and the kill switch) and re-verifies every published claim offline. This
  * is the Identities-AI-side orchestration; the Relay adapter + confinement are
  * the partner's (imported, not reimplemented). Points that depend on the Relay
  * adapter carrying the bundle, or on the OS-enforced filesystem boundary, are
@@ -81,7 +82,7 @@ const COMMITS = [
 async function scene1_delegation(): Promise<Chain> {
   // Client (Identities AI) issues: scope files:write, resource_path { TARGET_RESOURCE_ID, /docs },
   // short expiry, revocable. Signed with the client root key. identity:delegate is granted on the
-  // ROOT cert too — without it the sub-delegation in scene 2 fails closed (delegation_not_authorized);
+  // ROOT cert too; without it the sub-delegation in scene 2 fails closed (delegation_not_authorized);
   // the leaf narrows it away so the implementation agent cannot re-delegate.
   const chain = await buildChain();
   const r = await verifyBundle(
@@ -95,7 +96,7 @@ async function scene1_delegation(): Promise<Chain> {
 
 async function scene2_handoff(chain: Chain): Promise<void> {
   // Lead agent sub-delegates to the implementation agent; authority narrows at the hop (the leaf
-  // cert drops identity:delegate). There is no real Relay middleware here — buildChain() models the
+  // cert drops identity:delegate). There is no real Relay middleware here; buildChain() models the
   // sub-delegation directly with the SDK.
   // TODO(adapter): in the real engagement the Relay middleware carries this bundle between agents
   //   (never the keys), mapping its grammar relayfile:fs:write:/docs/** to files:write +
@@ -112,7 +113,7 @@ async function sceneFederation(): Promise<void> {
   // authority: relay:v1:<host>:channel:<id>. Authority under the host THIS verifier serves is
   // accepted; the SAME channel id under a different deployment authority is refused by the
   // serve-authority policy, while the delegation itself stays cryptographically valid (authority-
-  // to-act and resource-namespace are orthogonal — FEDERATION-NAMESPACE-RULE-2026-08-04.md §3).
+  // to-act and resource-namespace are orthogonal; see FEDERATION-NAMESPACE-RULE-2026-08-04.md §3).
   // TODO(adapter): the real scene runs two independent Relay deployments federating over A2A; that
   //   transport and the second deployment are Agent Relay's deliverable. Here we model only the
   //   accept/refuse decision. The full adversarial form (with negative control) is the annex
@@ -134,7 +135,7 @@ async function sceneFederation(): Promise<void> {
   );
 
   // The same channel id under the contractor authority: refused here, because this verifier does
-  // not serve that deployment. (Its delegation would still verify — it just names another namespace.)
+  // not serve that deployment. (Its delegation would still verify; it just names another namespace.)
   assert(
     !servesAuthority(wrongAuthority, served),
     "federation refuse: same channel id under a different deployment authority MUST be refused by this verifier",
@@ -364,12 +365,12 @@ async function main(): Promise<void> {
 
   const ok = verified === total && annex.refused === annex.total;
   if (!ok) {
-    console.error("engagement: FAILED — not every claim re-verified or not every adversarial case refused");
+    console.error("engagement: FAILED: not every claim re-verified or not every adversarial case refused");
     process.exit(1);
   }
 }
 
 main().catch((err) => {
-  console.error("engagement: FAILED —", err instanceof Error ? err.stack ?? err.message : err);
+  console.error("engagement: FAILED:", err instanceof Error ? err.stack ?? err.message : err);
   process.exit(1);
 });

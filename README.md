@@ -1,6 +1,6 @@
-# Agent Relay × Ratify — Phase 2 engagement (reproduction repo)
+# Agent Relay × Ratify: Phase 2 engagement (reproduction repo)
 
-**Status:** the non-gated half runs end to end offline (`npm run engagement`, exit 0). This is the Identities-AI-side reproduction harness and adversarial annex for the Phase 2 flagship. It orchestrates and publishes an engagement that runs on Agent Relay's adapter + confinement; it does not reimplement them. The path-traversal and two-principal-isolation cases stay gated on the partner confinement closure.
+**Status:** the offline half runs end to end (`npm run engagement`, exit 0). This is the Identities-AI-side reproduction harness and adversarial annex for the Phase 2 flagship. It orchestrates and publishes an engagement that runs on Agent Relay's adapter + confinement; it does not reimplement them. The fully-enforced path-traversal and two-principal-isolation cases are enforced by Agent Relay's OS-level confinement adapter in the real engagement, not by this offline harness; they SKIP here.
 
 Ratify is infrastructure here: it supplies the portable delegated-authority proof. Agent Relay coordinates the work and enforces the filesystem boundary.
 
@@ -22,23 +22,23 @@ npm run engagement    # replays the engagement scenes (delegation, handoff, the 
 npm run typecheck     # tsc --noEmit
 ```
 Offline by default. No call to either company. A reader reproduces every claim with the open SDKs.
-The local dev build depends on the workspace SDK via a `file:` dependency (`@identities-ai/ratify-protocol`); the published reproduction pins the alpha.16 tag once cut.
+The local dev build depends on the workspace SDK via a `file:` dependency (`@identities-ai/ratify-protocol`); the published reproduction pins the alpha.16 tag (`v1.0.0-alpha.16`, published 2026-08-05).
 
-Determinism: keys, IDs, scopes, constraints, challenges, timestamps and decisions are deterministic (fixed demo seeds + a fixed time base). The ML-DSA-65 half of each hybrid signature is *hedged* by the pinned `@noble/post-quantum`, so raw signature bytes differ between generations while every signature still verifies — see `evidence/VERIFY.md`.
+Determinism: keys, IDs, scopes, constraints, challenges, timestamps and decisions are deterministic (fixed demo seeds + a fixed time base). The ML-DSA-65 half of each hybrid signature is *hedged* by the pinned `@noble/post-quantum`, so raw signature bytes differ between generations while every signature still verifies. See `evidence/VERIFY.md`.
 
 ## Verify with any of the five SDKs (the point of the exercise)
 The evidence trail is SDK-agnostic. Each published bundle/receipt can be re-verified with Go, TypeScript, Python, Rust, or C. The TypeScript commands run as-is (`npx tsx scripts/verify-one.ts commit-1`); the other four are templated with the correct invocation shape. See `evidence/VERIFY.md`.
 
 ## Dependencies and what is gated
-- **Buildable now (offline, on `main`):** the full five-scene harness, the evidence-trail format + replay, and adversarial cases for scope escalation, replay, expired, revoked, wrong-operation binding, and the federation same-id-wrong-authority refusal — each with a genuine negative control (resource_path, receipts, operation-context, and the deployment serve-authority policy are all in place). The federation case models scene 3 of the (a) two-deployment scope: a grant naming the same channel id under a deployment authority the verifier does not serve is refused by policy, while the delegation itself verifies (authority-to-act and resource-namespace are orthogonal — see `../../to-relay/FEDERATION-NAMESPACE-RULE-2026-08-04.md`).
-- **Gated on the alpha.16 tag** (held on Agent Relay's confinement closure): pinned installable alpha.16 SDK builds, and the fully-enforced path-traversal + two-principal isolation cases (they SKIP loudly here, never silently pass).
+- **Buildable now (offline, on `main`):** the full engagement harness, the evidence-trail format + replay, and adversarial cases for scope escalation, replay, expired, revoked, wrong-operation binding, and the federation same-id-wrong-authority refusal, each with a genuine negative control (resource_path, receipts, operation-context, and the deployment serve-authority policy are all in place). The federation case models scene 3 of the (a) two-deployment scope: a grant naming the same channel id under a deployment authority the verifier does not serve is refused by policy, while the delegation itself verifies (authority-to-act and resource-namespace are orthogonal; see `../../to-relay/FEDERATION-NAMESPACE-RULE-2026-08-04.md`).
+- **Enforced by Agent Relay's runtime, not this offline harness:** the fully-enforced path-traversal and two-principal isolation cases run against Agent Relay's OS-level confinement adapter in the real engagement; they SKIP loudly here, never silently pass. (alpha.16 is published, so the pinned SDK builds are available, and the confinement closure landed 2026-08-05; these two cases still need the real adapter at run time.)
 
 ## Layout
-- `src/engagement.ts` — the five-scene harness.
-- `src/harness.ts` — shared offline/deterministic primitives (demo keys, chain builder, contexts, revocation provider).
-- `adversarial/annex.ts` — the runnable failing tests + negative controls + case list.
-- `scripts/verify-one.ts` — re-verify a single published claim from the committed bytes.
-- `evidence/` — bundles, receipts, delegation chain, `manifest.json`, and `VERIFY.md`.
-- `docs-target/` — a mirror of the `/docs` content the agent works in (for local rehearsal before the real repo exists).
+- `src/engagement.ts`: the engagement harness (delegation, handoff, federation, work + receipts, kill switch).
+- `src/harness.ts`: shared offline/deterministic primitives (demo keys, chain builder, contexts, revocation provider).
+- `adversarial/annex.ts`: the runnable failing tests + negative controls + case list.
+- `scripts/verify-one.ts`: re-verify a single published claim from the committed bytes.
+- `evidence/`: bundles, receipts, delegation chain, `manifest.json`, and `VERIFY.md`.
+- `docs-target/`: a mirror of the `/docs` content the agent works in (for local rehearsal before the real repo exists).
 
 See `../../publications/phase2-flagship/repo-and-harness-SPEC.md` for the full spec and `../../publications/phase2-flagship/article-DRAFT.md` for the article this run feeds.

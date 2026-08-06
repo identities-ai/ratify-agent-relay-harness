@@ -1,4 +1,4 @@
-# docs-target — rehearsal mirror of the engagement's /docs
+# docs-target: rehearsal mirror of the engagement's /docs
 
 This directory mirrors the `/docs` tree of the public target repository (`identities-ai/<engagement-repo>`) that the Phase 2 engagement runs against, so the harness can rehearse locally before that repo exists.
 
