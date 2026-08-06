@@ -1,0 +1,23 @@
+{
+  "name": "ratify-phase2-engagement",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent Relay x Ratify Phase 2 engagement: reproduction harness + adversarial annex",
+  "scripts": {
+    "engagement": "tsx src/engagement.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@identities-ai/ratify-protocol": "file:../ratify-protocol/sdks/typescript",
+    "@noble/hashes": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

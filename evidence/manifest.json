@@ -1,0 +1,42 @@
+{
+  "target_resource_id": "git:github.com/identities-ai/ratify-agent-relay-engagement",
+  "bound_path_prefix": "/docs",
+  "verifier_id": "ratify-verifier-demo",
+  "revoked_certs": [
+    "demo-cert-root"
+  ],
+  "claims": [
+    {
+      "label": "commit-1",
+      "sha": "ad13ba34272f29694f4621e21bf4bbad4941468d",
+      "requested_path": "/docs/getting-started.md",
+      "verified_at": 1700000060,
+      "expected_decision": "authorized_agent",
+      "revoked": false
+    },
+    {
+      "label": "commit-2",
+      "sha": "27766a01f7b41765c672cd841eb34d192e145cfc",
+      "requested_path": "/docs/guides/install.md",
+      "verified_at": 1700000120,
+      "expected_decision": "authorized_agent",
+      "revoked": false
+    },
+    {
+      "label": "commit-3",
+      "sha": "fece01a35bbe8210897a43ea3f904b7e6a0efce8",
+      "requested_path": "/docs/index.md",
+      "verified_at": 1700000180,
+      "expected_decision": "authorized_agent",
+      "revoked": false
+    },
+    {
+      "label": "killswitch",
+      "sha": "72fb176ef3912f14947ba1824b5639801221d601",
+      "requested_path": "/docs/after-revocation.md",
+      "verified_at": 1700000240,
+      "expected_decision": "revoked",
+      "revoked": true
+    }
+  ]
+}

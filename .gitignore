@@ -1,0 +1,10 @@
+# Dependencies (restored with `npm ci`)
+node_modules/
+
+# Build / tooling output
+dist/
+*.tsbuildinfo
+*.log
+
+# OS
+.DS_Store
