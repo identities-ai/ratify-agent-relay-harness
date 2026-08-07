@@ -45,6 +45,7 @@ import {
   buildVerificationContext,
   demoKeypair,
   deterministicChallenge,
+  parseRelayResourceId,
   relayResourceId,
   servesAuthority,
   syntheticSha,
@@ -105,6 +106,57 @@ async function scene2_handoff(chain: Chain): Promise<void> {
   assert(leaf.scope.includes(SCOPE_FILES_WRITE), "leaf must retain files:write");
   assert(!leaf.scope.includes("identity:delegate"), "leaf must NOT retain identity:delegate (narrowing at the hop)");
   console.log(`scene2  handoff: authority narrowed at the hop -> leaf scope=[${leaf.scope.join(", ")}]`);
+}
+
+function sceneParserBoundaries(): void {
+  // Boundary vectors for the harness's Relay resource_id parser, taken from the live v0.6
+  // profile (§4.0 per-type grammars, §7.1 canonical forms, §7.6 invalid inputs, §7.7 u64
+  // bound). servesAuthority() fails closed on a parse failure, so the parser rejecting a
+  // VALID id would silently refuse a legitimate grant — the accept vectors guard that.
+  const ACCEPT = [
+    "relay:v1:cast.agentrelay.com:workspace:206880000000000123",
+    "relay:v1:cast.agentrelay.com:channel:206880000000000456",
+    "relay:v1:cast.agentrelay.com:dm:206880000000000789", // group DM = Snowflake (§4.0)
+    "relay:v1:cast.agentrelay.com:dm:dm_15c60360330ea3d22ae818a6", // 1:1 DM digest
+    "relay:v1:cast.agentrelay.com:node:206880000000000999",
+    "relay:v1:cast.agentrelay.com:node:node_direct_206880000000000111", // implicit node (§4.4)
+    "relay:v1:relay.example.com:8443:channel:206880000000000456", // non-default port, 6 segments
+    "relay:v1:cast.agentrelay.com:channel:18446744073709551615", // u64 max (§7.7)
+    "relay:v1:cast.agentrelay.com:node:node_direct_18446744073709551615", // embedded u64 max
+  ];
+  const REJECT = [
+    "relay:v1:cast.agentrelay.com:channel:18446744073709551616", // u64 max + 1
+    "relay:v1:cast.agentrelay.com:channel:99999999999999999999", // 20 digits, above max
+    "relay:v1:cast.agentrelay.com:channel:118446744073709551615", // 21 digits
+    "relay:v1:cast.agentrelay.com:channel:04560", // leading zero
+    "relay:v1:cast.agentrelay.com:channel:45x6", // non-digit
+    "relay:v1:cast.agentrelay.com:node:node_direct_0123", // leading zero inside node_direct_
+    "relay:v1:cast.agentrelay.com:node:node_direct_18446744073709551616", // embedded above max
+    "relay:v1:cast.agentrelay.com:node:node_direct_", // empty embedded Snowflake
+    "relay:v1:cast.agentrelay.com:workspace:dm_15c60360330ea3d22ae818a6", // digest under wrong type
+    "relay:v1:cast.agentrelay.com:workspace:node_direct_206880000000000111", // implicit node under wrong type
+    "relay:v1:cast.agentrelay.com:channel:node_direct_206880000000000111",
+    "relay:v1:cast.agentrelay.com:dm:node_direct_206880000000000111",
+    "relay:v1:cast.agentrelay.com:dm:DM_15c60360330ea3d22ae818a6", // uppercase prefix
+    "relay:v1:cast.agentrelay.com:dm:dm_15C60360330EA3D22AE818A6", // uppercase digest
+    "relay:v1:cast.agentrelay.com:dm:dm_15c60360330ea3d2", // wrong digest length
+    "relay:v1:cast.agentrelay.com:node-pool:206880000000000999", // withdrawn type (§4.5)
+    "relay:v1:cast.agentrelay.com:room:456", // type not in the enum
+  ];
+
+  for (const rid of ACCEPT) {
+    const parsed = parseRelayResourceId(rid);
+    assert(parsed !== null, `parser must accept valid v0.6 id: ${rid}`);
+    // Round-trip stability (§7): reconstructing from the parsed components reproduces the bytes.
+    assert(
+      relayResourceId(parsed.authority, parsed.type, parsed.id) === rid,
+      `parser round-trip must be byte-identical: ${rid}`,
+    );
+  }
+  for (const rid of REJECT) {
+    assert(parseRelayResourceId(rid) === null, `parser must reject invalid id: ${rid}`);
+  }
+  console.log(`scene-fed  parser boundaries: ${ACCEPT.length} valid accepted (round-trip stable), ${REJECT.length} invalid rejected`);
 }
 
 async function sceneFederation(): Promise<void> {
@@ -350,6 +402,7 @@ function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
 async function main(): Promise<void> {
   const chain = await scene1_delegation();
   await scene2_handoff(chain);
+  sceneParserBoundaries();
   await sceneFederation();
   const commitClaims = await scene3_work_with_receipts(chain);
   const killClaim = await scene4_kill_switch(chain, commitClaims);

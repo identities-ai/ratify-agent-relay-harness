@@ -137,15 +137,21 @@ function isCanonicalPort(port: string): boolean {
   return n >= 1 && n <= 65535 && n !== 443;
 }
 
-/** Canonical id per profile §4: dm = dm_<24 lowercase hex>; snowflake types = decimal u64, no leading zero. */
+/** Snowflake per profile §4.0: [1-9][0-9]{0,19}, bounded to u64 max (§7.7). Regex guarantees BigInt parses. */
+function isSnowflake(id: string): boolean {
+  if (!/^[1-9][0-9]{0,19}$/.test(id)) return false;
+  return BigInt(id) <= 18446744073709551615n;
+}
+
+/**
+ * Canonical id per profile §4.0, the full per-type grammar: workspace/channel = Snowflake;
+ * dm = Snowflake (group DM) OR dm_<24 lowercase hex> (1:1 digest); node = Snowflake OR
+ * node_direct_<Snowflake> (implicit single-agent node, §4.4).
+ */
 function isCanonicalId(type: string, id: string): boolean {
-  if (type === "dm") return /^dm_[0-9a-f]{24}$/.test(id);
-  if (!/^[1-9][0-9]*$/.test(id)) return false;
-  try {
-    return BigInt(id) <= 18446744073709551615n; // u64 bound (profile §4/§7.7)
-  } catch {
-    return false;
-  }
+  if (type === "dm" && id.startsWith("dm_")) return /^dm_[0-9a-f]{24}$/.test(id);
+  if (type === "node" && id.startsWith("node_direct_")) return isSnowflake(id.slice("node_direct_".length));
+  return isSnowflake(id);
 }
 
 /**
