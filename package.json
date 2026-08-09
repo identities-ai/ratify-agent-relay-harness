@@ -1,5 +1,5 @@
 {
-  "name": "ratify-phase2-engagement",
+  "name": "ratify-agent-relay-harness",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@identities-ai/ratify-protocol": "file:../ratify-protocol/sdks/typescript",
+    "@identities-ai/ratify-protocol": "1.0.0-alpha.16",
     "@noble/hashes": "^1.5.0"
   },
   "devDependencies": {

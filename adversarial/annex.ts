@@ -253,7 +253,7 @@ export async function runAnnex(): Promise<{ refused: number; total: number }> {
 
   // Gated cases: SKIP loudly. They must NOT silently pass.
   for (const c of CASES.filter((c) => c.gated)) {
-    console.log(`annex   ${c.id}: SKIP (gated on C5 confinement closure: Agent Relay's OS-enforced filesystem boundary; see their ratify-demo confinement deliverable)`);
+    console.log(`annex   ${c.id}: SKIP (runs against Agent Relay's OS-enforced confinement adapter in the live engagement, not in this offline harness)`);
   }
 
   return { refused, total: runnable.length };

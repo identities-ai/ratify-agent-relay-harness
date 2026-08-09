@@ -1,5 +1,5 @@
 /*
- * Ratify Protocol — Phase 2 engagement: C verifier for the committed evidence.
+ * Ratify Protocol, Phase 2 engagement: C verifier for the committed evidence.
  *
  * Re-verifies the committed evidence trail offline with the C SDK, consuming
  * the SAME committed bytes as the TypeScript / Go / Python / Rust verifiers.
@@ -7,16 +7,20 @@
  * Coverage note (current C FFI surface):
  *   [x] bundle  -> identity_status  (ratify_verify_bundle_opts_v2)
  *   [x] receipt -> signature verify (ratify_receipt_verify)
- *   [ ] receipt -> bundle_hash binding  — NOT exposed: ratify_bundle_hash needs a
+ *   [ ] receipt -> bundle_hash binding  (NOT exposed: ratify_bundle_hash needs a
  *       RatifyProofBundle* handle and the FFI has no ratify_proof_bundle_from_json,
- *       nor an accessor for the receipt's stored bundle_hash field.
- *   [ ] receipt -> prev_hash chain link — NOT exposed: no accessor for the
- *       receipt's stored prev_hash field.
+ *       nor an accessor for the receipt's stored bundle_hash field)
+ *   [ ] receipt -> prev_hash chain link (NOT exposed: no accessor for the
+ *       receipt's stored prev_hash field)
  * The two binding checks are covered by the Go / Rust / TypeScript lanes.
  *
  * The tiny fixed manifest (target resource id, revoked cert, and the four
  * claims) is embedded here so the C lane has no JSON dependency; it mirrors
  * evidence/manifest.json byte-for-byte.
+ *
+ * The include/library paths below assume a checkout of
+ * github.com/identities-ai/ratify-protocol (tag v1.0.0-alpha.16) cloned as a
+ * sibling of this repository.
  *
  * Build (macOS), from verify/c/ after `cargo build --release` in the C SDK:
  *   cc verify_one.c \
@@ -95,7 +99,7 @@ int main(int argc, char **argv)
         char *bundle_json  = read_file(bundle_path);
         char *receipt_json = read_file(receipt_path);
         if (!bundle_json || !receipt_json) {
-            fprintf(stderr, "verify_one: FAILED — cannot read evidence for %s\n", c->label);
+            fprintf(stderr, "verify_one: FAILED: cannot read evidence for %s\n", c->label);
             free(bundle_json); free(receipt_json);
             return 1;
         }

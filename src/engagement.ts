@@ -3,7 +3,7 @@
  *
  * Replays the engagement scenes (delegation, handoff, the offline federation model, the work
  * with receipts, and the kill switch) and re-verifies every published claim offline. This
- * is the Identities-AI-side orchestration; the Relay adapter + confinement are
+ * is the Ratify-Protocol-side orchestration; the Relay adapter + confinement are
  * the partner's (imported, not reimplemented). Points that depend on the Relay
  * adapter carrying the bundle, or on the OS-enforced filesystem boundary, are
  * marked TODO(adapter) where that layer genuinely belongs.
@@ -86,7 +86,7 @@ const COMMITS = [
 // ---------------------------------------------------------------------------
 
 async function scene1_delegation(): Promise<Chain> {
-  // Client (Identities AI) issues: scope files:write, resource_path { TARGET_RESOURCE_ID, /docs },
+  // Client (Ratify Protocol) issues: scope files:write, resource_path { TARGET_RESOURCE_ID, /docs },
   // short expiry, revocable. Signed with the client root key. identity:delegate is granted on the
   // ROOT cert too; without it the sub-delegation in scene 2 fails closed (delegation_not_authorized);
   // the leaf narrows it away so the implementation agent cannot re-delegate.
@@ -117,7 +117,7 @@ function sceneParserBoundaries(): void {
   // Boundary vectors for the harness's Relay resource_id parser, taken from the live v0.6
   // profile (§4.0 per-type grammars, §7.1 canonical forms, §7.6 invalid inputs, §7.7 u64
   // bound). servesAuthority() fails closed on a parse failure, so the parser rejecting a
-  // VALID id would silently refuse a legitimate grant — the accept vectors guard that.
+  // VALID id would silently refuse a legitimate grant; the accept vectors guard that.
   const ACCEPT = [
     "relay:v1:cast.agentrelay.com:workspace:206880000000000123",
     "relay:v1:cast.agentrelay.com:channel:206880000000000456",
@@ -270,7 +270,7 @@ async function scene4_kill_switch(chain: Chain, prevClaims: Claim[]): Promise<Cl
 
 async function scene5_publish_and_reverify(chain: Chain, claims: Claim[]): Promise<{ verified: number; total: number }> {
   // With --write-evidence: write the evidence trail (delegation chain, every ProofBundle, the
-  // VerificationReceipt chain) under evidence/. Always: replay from disk — re-verify every bundle
+  // VerificationReceipt chain) under evidence/. Always: replay from disk, re-verifying every bundle
   // and receipt offline, print each identity_status, check the prev_hash chain is intact. Exits
   // non-zero on any failure. The default (no flag) verifies the committed evidence unmodified.
   if (WRITE_EVIDENCE) {
@@ -281,7 +281,7 @@ async function scene5_publish_and_reverify(chain: Chain, claims: Claim[]): Promi
   // --- Offline replay: read committed inputs back from disk and re-verify. ---
   const manifest = JSON.parse(
     await readFile(join(EVIDENCE_DIR, "manifest.json"), "utf8").catch(() => {
-      throw new Error("evidence/manifest.json not found — run `npm run engagement -- --write-evidence` to generate the evidence trail");
+      throw new Error("evidence/manifest.json not found; run `npm run engagement -- --write-evidence` to generate the evidence trail");
     }),
   ) as ManifestFile;
   const revoked = new Set(manifest.revoked_certs);

@@ -9,6 +9,6 @@ name = "verify_one"
 path = "src/main.rs"
 
 [dependencies]
-# Local workspace SDK. The published reproduction pins the alpha.16 tag once cut.
-ratify-protocol = { path = "../../../ratify-protocol/sdks/rust" }
+# Published SDK from crates.io.
+ratify-protocol = "1.0.0-alpha.16"
 serde_json = "1"

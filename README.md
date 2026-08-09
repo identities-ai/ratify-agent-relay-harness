@@ -1,8 +1,8 @@
 # Agent Relay × Ratify: Phase 2 engagement (reproduction repo)
 
-**Status:** the offline half runs end to end (`npm run engagement`, exit 0). This is the Identities-AI-side reproduction harness and adversarial annex for the Phase 2 flagship. It orchestrates and publishes an engagement that runs on Agent Relay's adapter + confinement; it does not reimplement them. The fully-enforced path-traversal and two-principal-isolation cases are enforced by Agent Relay's OS-level confinement adapter in the real engagement, not by this offline harness; they SKIP here.
+**Status:** the offline half runs end to end (`npm run engagement`, exit 0). This is the Ratify-Protocol-side reproduction harness and adversarial annex for the Phase 2 flagship. It orchestrates and publishes an engagement that runs on [Agent Relay](https://agentrelay.com)'s adapter + confinement; it does not reimplement them. The fully-enforced path-traversal and two-principal-isolation cases are enforced by Agent Relay's OS-level confinement adapter in the real engagement, not by this offline harness; they SKIP here.
 
-Ratify is infrastructure here: it supplies the portable delegated-authority proof. Agent Relay coordinates the work and enforces the filesystem boundary.
+[Ratify](https://ratifyprotocol.com) is infrastructure here: it supplies the portable delegated-authority proof. Agent Relay coordinates the work and enforces the filesystem boundary.
 
 ## What this repo is
 - The one-command reproduction of the engagement (`npm run engagement`), offline, exits non-zero if any published claim fails to re-verify.
@@ -10,8 +10,8 @@ Ratify is infrastructure here: it supplies the portable delegated-authority proo
 - The adversarial annex (`adversarial/`): runnable failing tests a skeptic can run.
 
 ## What this repo is not
-- Not the target repo. The delegation is bound to `/docs` of a separate public repo, `identities-ai/<engagement-repo>`.
-- Not the adapter or confinement layer. Those are Agent Relay's (`@relayfile/local-mount`, `@relaycast/engine`, and the confinement work in their `ratify-demo`).
+- Not the target repo. The delegation is bound to `/docs` of a separate public repo, `identities-ai/ratify-agent-relay-engagement`.
+- Not the adapter or confinement layer. Those are Agent Relay's (`@relayfile/local-mount`, `@relaycast/engine`, and their OS-enforced confinement adapter).
 
 ## One-command flow
 ```
@@ -19,29 +19,30 @@ npm ci
 npm run engagement    # replays the engagement scenes (delegation, handoff, the federation beat, the work +
                       # receipts, the kill switch), re-verifies every committed bundle + receipt offline,
                       # runs the adversarial annex, prints: "engagement: N/N verified, M/M refused".
-                      # Never modifies evidence/ — a verification run leaves the clone clean.
+                      # Never modifies evidence/, so a verification run leaves the clone clean.
 npm run evidence      # same run, but regenerates evidence/ first (--write-evidence). Signature bytes
                       # differ on every regeneration (hedged ML-DSA); commit the result deliberately.
 npm run typecheck     # tsc --noEmit
 ```
 Offline by default. No call to either company. A reader reproduces every claim with the open SDKs.
-The local dev build depends on the workspace SDK via a `file:` dependency (`@identities-ai/ratify-protocol`); the published reproduction pins the alpha.16 tag (`v1.0.0-alpha.16`, published 2026-08-05).
+All dependencies pin the published `v1.0.0-alpha.16` release: npm `@identities-ai/ratify-protocol`, the Go module tag, crates.io `ratify-protocol`, and PyPI `ratify-protocol==1.0.0a16`.
 
-Determinism: keys, IDs, scopes, constraints, challenges, timestamps and decisions are deterministic (fixed demo seeds + a fixed time base). The ML-DSA-65 half of each hybrid signature is *hedged* by the pinned `@noble/post-quantum`, so raw signature bytes differ between generations while every signature still verifies. See `evidence/VERIFY.md`.
+Determinism: keys, IDs, scopes, constraints, challenges, timestamps and decisions are deterministic (fixed demo seeds + a fixed time base). The ML-DSA-65 half of each hybrid signature is *hedged* by the pinned `@noble/post-quantum`, so raw signature bytes differ between generations while every signature still verifies. See `VERIFY.md`.
 
 ## Verify with any of the five SDKs (the point of the exercise)
-The evidence trail is SDK-agnostic. Each published bundle/receipt can be re-verified with Go, TypeScript, Python, Rust, or C. The TypeScript commands run as-is (`npx tsx scripts/verify-one.ts commit-1`); the other four are templated with the correct invocation shape. See `evidence/VERIFY.md`.
+The evidence trail is SDK-agnostic. Each published bundle/receipt can be re-verified with Go, TypeScript, Python, Rust, or C, and the first four run as committed against the published SDK releases. The C lane builds from a source checkout of the SDK. See `VERIFY.md` for every command.
 
 ## Dependencies and what is gated
-- **Buildable now (offline, on `main`):** the full engagement harness, the evidence-trail format + replay, and adversarial cases for scope escalation, replay, expired, revoked, wrong-operation binding, and the federation same-id-wrong-authority refusal, each with a genuine negative control (resource_path, receipts, operation-context, and the deployment serve-authority policy are all in place). The federation case models scene 3 of the (a) two-deployment scope: a grant naming the same channel id under a deployment authority the verifier does not serve is refused by policy, while the delegation itself verifies (authority-to-act and resource-namespace are orthogonal; see `../../to-relay/FEDERATION-NAMESPACE-RULE-2026-08-04.md`).
-- **Enforced by Agent Relay's runtime, not this offline harness:** the fully-enforced path-traversal and two-principal isolation cases run against Agent Relay's OS-level confinement adapter in the real engagement; they SKIP loudly here, never silently pass. (alpha.16 is published, so the pinned SDK builds are available, and the confinement closure landed 2026-08-05; these two cases still need the real adapter at run time.)
+- **Runs now (offline, on `main`):** the full engagement harness, the evidence-trail format + replay, and adversarial cases for scope escalation, replay, expired, revoked, wrong-operation binding, and the federation same-id-wrong-authority refusal, each with a genuine negative control (resource_path, receipts, operation-context, and the deployment serve-authority policy are all in place). The federation case models the two-deployment scene: a grant naming the same channel id under a deployment authority the verifier does not serve is refused by deployment policy (reason `unserved_authority`), while the delegation itself stays cryptographically valid. Authority-to-act and resource-namespace are orthogonal; a verifier serves exactly its own deployment authority and refuses resources under any other.
+- **Enforced by Agent Relay's runtime, not this offline harness:** the fully-enforced path-traversal and two-principal isolation cases run against Agent Relay's OS-level confinement adapter in the real engagement; they SKIP loudly here, never silently pass.
 
 ## Layout
 - `src/engagement.ts`: the engagement harness (delegation, handoff, federation, work + receipts, kill switch).
 - `src/harness.ts`: shared offline/deterministic primitives (demo keys, chain builder, contexts, revocation provider).
 - `adversarial/annex.ts`: the runnable failing tests + negative controls + case list.
 - `scripts/verify-one.ts`: re-verify a single published claim from the committed bytes.
-- `evidence/`: bundles, receipts, delegation chain, `manifest.json`, and `VERIFY.md`.
-- `docs-target/`: a mirror of the `/docs` content the agent works in (for local rehearsal before the real repo exists).
+- `evidence/`: bundles, receipts, delegation chain, and `manifest.json`.
+- `verify/`: the Go, Python, Rust, and C verifier lanes (see `VERIFY.md`).
+- `docs-target/`: a mirror of the `/docs` content the agent works in (for local rehearsal before the engagement runs).
 
-See `../../publications/phase2-flagship/repo-and-harness-SPEC.md` for the full spec and `../../publications/phase2-flagship/article-DRAFT.md` for the article this run feeds.
+The engagement article links here when it publishes.
