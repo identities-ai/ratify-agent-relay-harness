@@ -1,0 +1,50 @@
+name: verify
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Reproduce the engagement against the committed evidence
+        run: npm run engagement
+      - name: Verification must leave the tree clean
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "verification run modified the working tree:" >&2
+            git status --porcelain >&2
+            exit 1
+          fi
+  verify-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: verify/go/go.sum
+      - run: go run .
+        working-directory: verify/go
+  verify-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install "ratify-protocol==1.0.0a16"
+      - run: python verify_one.py
+        working-directory: verify/python
+  verify-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo run --release
+        working-directory: verify/rust

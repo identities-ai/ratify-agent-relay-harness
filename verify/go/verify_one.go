@@ -1,5 +1,5 @@
 // Command verify_one re-verifies the committed Phase 2 evidence trail offline
-// with the reference Go SDK — the SAME committed bytes the TypeScript
+// with the reference Go SDK, consuming the SAME committed bytes the TypeScript
 // scripts/verify-one.ts consumes. It decodes each ProofBundle and its
 // VerificationReceipt, then checks, per claim:
 //
@@ -179,6 +179,6 @@ func okmiss(ok bool, yes, no string) string {
 }
 
 func fatal(format string, args ...any) {
-	fmt.Fprintf(os.Stderr, "verify_one: FAILED — "+format+"\n", args...)
+	fmt.Fprintf(os.Stderr, "verify_one: FAILED: "+format+"\n", args...)
 	os.Exit(1)
 }

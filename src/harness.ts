@@ -5,7 +5,7 @@
  * seeds, challenges and commit shas derive from fixed labels, and all
  * timestamps derive from a single fixed base. Nothing calls the network.
  *
- * These are DEMO keys — clearly labelled, generated in-harness from fixed
+ * These are DEMO keys, clearly labelled, generated in-harness from fixed
  * seeds, never reused for anything real. Ratify supplies the portable proof;
  * Agent Relay's adapter + confinement (imported, not reimplemented here)
  * supply the middleware transport and the OS-enforced filesystem boundary.
@@ -42,7 +42,7 @@ export const TARGET_RESOURCE_ID =
 export const BOUND_PATH_PREFIX = "/docs";
 
 // Two independent Relay deployment authorities (the federation scene). Each is a
-// deployment's externally reachable API base host — the `<authority>` segment of
+// deployment's externally reachable API base host, the `<authority>` segment of
 // `relay:v1:<authority>:<type>:<id>`. They are globally unique at a moment, so two
 // deployments cannot mint colliding identifiers (RELAY-IDENTIFIER-PROFILE requirement #1).
 export const CLIENT_DEPLOYMENT_AUTHORITY = "relay.identities.ai";
@@ -63,19 +63,19 @@ export function emptySig(): HybridSignature {
 
 /** Derive a deterministic demo hybrid keypair from a fixed label. */
 export async function demoKeypair(label: string) {
-  const edSeed = sha256(new TextEncoder().encode(`ratify-demo-ed25519:${label}`));
-  const mlSeed = sha256(new TextEncoder().encode(`ratify-demo-mldsa65:${label}`));
+  const edSeed = sha256(new TextEncoder().encode(`ratify-engagement-ed25519:${label}`));
+  const mlSeed = sha256(new TextEncoder().encode(`ratify-engagement-mldsa65:${label}`));
   return hybridKeypairFromSeeds(edSeed, mlSeed);
 }
 
 /** A deterministic 32-byte challenge from a fixed label (offline stand-in for a verifier nonce). */
 export function deterministicChallenge(label: string): Uint8Array {
-  return sha256(new TextEncoder().encode(`ratify-demo-challenge:${label}`));
+  return sha256(new TextEncoder().encode(`ratify-engagement-challenge:${label}`));
 }
 
 /** A deterministic synthetic 40-hex commit sha (offline stand-in for a git commit). */
 export function syntheticSha(label: string): string {
-  const h = sha256(new TextEncoder().encode(`ratify-demo-commit:${label}`));
+  const h = sha256(new TextEncoder().encode(`ratify-engagement-commit:${label}`));
   let out = "";
   for (const b of h.slice(0, 20)) out += b.toString(16).padStart(2, "0");
   return out;
@@ -87,7 +87,7 @@ export function syntheticSha(label: string): string {
  * The engagement's git-repo resource is bound here directly. The federation
  * dimension (deployment authority) is not threaded into this git context; it is
  * carried in the Relay channel resource_id and enforced by servesAuthority()
- * below — see the federation scene. Keep this context for the git-repo work.
+ * below. See the federation scene. Keep this context for the git-repo work.
  */
 export function buildVerificationContext(
   requestedPath: string,
@@ -104,7 +104,7 @@ export function buildVerificationContext(
 // Answers "when authority crosses deployments, whose namespace does the resource live in?"
 // (FEDERATION-NAMESPACE-RULE-2026-08-04.md). The `<authority>` fixes the namespace; a verifier
 // serves exactly its own authority and refuses resources under any other. Authority-to-act and
-// resource-namespace are orthogonal, so this is deployment/adapter policy — Ratify core still
+// resource-namespace are orthogonal, so this is deployment/adapter policy; Ratify core still
 // treats resource_id as opaque bytes compared by byte-equality (SPEC §5.7.3), unchanged.
 
 /** Construct a Relay resource identifier: relay:v1:<authority>:<type>:<id>. */
@@ -112,24 +112,80 @@ export function relayResourceId(authority: string, type: string, id: string): st
   return `relay:v1:${authority}:${type}:${id}`;
 }
 
-/** Parse a Relay resource_id into its parts. <authority> may carry a :port, so parse positionally. */
+// v1 type enum (profile §1). No others are valid.
+const RELAY_TYPES = new Set(["workspace", "channel", "dm", "node"]);
+
+/** Canonical host per profile §1: DNS labels only, >= 2 labels, last label not all-digits, no loopback/mDNS. */
+function isCanonicalHost(host: string): boolean {
+  if (host.length === 0 || host.length > 253) return false;
+  const labels = host.split(".");
+  if (labels.length < 2) return false; // at least two labels
+  for (const label of labels) {
+    if (label.length < 1 || label.length > 63) return false;
+    // charset a-z0-9-, no leading/trailing hyphen (single-char labels allowed)
+    if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(label)) return false;
+  }
+  if (/^[0-9]+$/.test(labels[labels.length - 1]!)) return false; // last label all-digits => IPv4-like
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) return false;
+  return true;
+}
+
+/** Canonical port per profile §1/§2: 1..65535, no leading zero, and 443 (the default) MUST be omitted. */
+function isCanonicalPort(port: string): boolean {
+  if (!/^[1-9][0-9]*$/.test(port)) return false; // digits, no leading zero (also rejects "0")
+  const n = Number(port);
+  return n >= 1 && n <= 65535 && n !== 443;
+}
+
+/** Snowflake per profile §4.0: [1-9][0-9]{0,19}, bounded to u64 max (§7.7). Regex guarantees BigInt parses. */
+function isSnowflake(id: string): boolean {
+  if (!/^[1-9][0-9]{0,19}$/.test(id)) return false;
+  return BigInt(id) <= 18446744073709551615n;
+}
+
+/**
+ * Canonical id per profile §4.0, the full per-type grammar: workspace/channel = Snowflake;
+ * dm = Snowflake (group DM) OR dm_<24 lowercase hex> (1:1 digest); node = Snowflake OR
+ * node_direct_<Snowflake> (implicit single-agent node, §4.4).
+ */
+function isCanonicalId(type: string, id: string): boolean {
+  if (type === "dm" && id.startsWith("dm_")) return /^dm_[0-9a-f]{24}$/.test(id);
+  if (type === "node" && id.startsWith("node_direct_")) return isSnowflake(id.slice("node_direct_".length));
+  return isSnowflake(id);
+}
+
+/**
+ * Parse a Relay resource_id, enforcing the v0.6 canonical grammar (profile §1): exactly 5 or 6
+ * colon segments (6 only for a non-default port), `relay:v1:` prefix, canonical host, canonical
+ * port when present, fixed type enum, canonical per-type id. Returns null for anything
+ * non-canonical so the serve-authority check fails closed. This is the harness's structural
+ * guard; the profile's own parser/validator remains the normative one.
+ */
 export function parseRelayResourceId(
   rid: string,
 ): { authority: string; type: string; id: string } | null {
   const parts = rid.split(":");
-  if (parts.length < 5 || parts[0] !== "relay" || parts[1] !== "v1") return null;
-  const id = parts[parts.length - 1]!;
+  if (parts.length < 5 || parts.length > 6) return null;
+  if (parts[0] !== "relay" || parts[1] !== "v1") return null;
+
   const type = parts[parts.length - 2]!;
-  const authority = parts.slice(2, parts.length - 2).join(":"); // host[:port]
-  if (!authority || !type || !id) return null;
-  return { authority, type, id };
+  const id = parts[parts.length - 1]!;
+  if (!RELAY_TYPES.has(type) || !isCanonicalId(type, id)) return null;
+
+  const auth = parts.slice(2, parts.length - 2); // 1 segment (host) or 2 (host, port)
+  const host = auth[0]!;
+  if (!isCanonicalHost(host)) return null;
+  if (auth.length === 1) return { authority: host, type, id };
+  const port = auth[1]!;
+  if (!isCanonicalPort(port)) return null;
+  return { authority: `${host}:${port}`, type, id };
 }
 
 /**
  * Deployment serve-authority policy (FEDERATION-NAMESPACE-RULE §3, the load-bearing rule).
  * A verifier serves exactly one deployment authority (its own externally reachable API base
  * host) and MUST refuse a resource-bound grant whose resource_id names an authority it does
- * not serve — even when the delegation is cryptographically valid. Byte-equality on the
+ * not serve, even when the delegation is cryptographically valid. Byte-equality on the
  * `<authority>` component; anything not a well-formed Relay resource fails closed.
  */
 export function servesAuthority(resourceId: string, servedAuthority: string): boolean {
@@ -212,7 +268,7 @@ export interface Chain {
  *
  * The client root signs rootCert; the lead agent signs leafCert (authority
  * narrows at the hop). This models the sub-delegation the Relay middleware
- * carries — the SDK is the source of truth for the certs; the middleware never
+ * carries. The SDK is the source of truth for the certs; the middleware never
  * holds the keys.
  */
 export async function buildChain(opts: ChainOpts = {}): Promise<Chain> {

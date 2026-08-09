@@ -79,6 +79,6 @@ function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 main().catch((err) => {
-  console.error("verify-one: FAILED —", err instanceof Error ? err.message : err);
+  console.error("verify-one: FAILED:", err instanceof Error ? err.message : err);
   process.exit(1);
 });

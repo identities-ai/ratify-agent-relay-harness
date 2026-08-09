@@ -10,7 +10,7 @@ VerificationReceipt, then checks:
   (3) receipt -> bundle_hash binding matches bundle_hash(bundle)
   (4) receipt -> prev_hash chain link is intact (genesis = 32 zero bytes)
 
-Usage (from verify/python/, with the local SDK installed — see VERIFY.md):
+Usage (from verify/python/, with the SDK installed; see VERIFY.md):
 
     python3 verify_one.py            # verify every claim in manifest order
     python3 verify_one.py commit-1   # verify a single claim by label

@@ -1,12 +1,14 @@
 /**
- * Adversarial annex — runnable FAILING tests a skeptic can run.
+ * Adversarial annex: runnable FAILING tests a skeptic can run.
  *
- * Each case asserts a refusal with a deterministic error_reason, and each has a
- * NEGATIVE CONTROL: it must fail loudly if its protection is disabled, so a green
- * run is evidence, not a vacuous pass.
+ * Each case asserts a refusal, and each has a NEGATIVE CONTROL: it must fail loudly if its
+ * protection is disabled, so a green run is evidence, not a vacuous pass. The refusal is a
+ * deterministic Ratify error_reason / identity_status, except the federation case, whose refusal
+ * is a deployment serve-authority policy decision layered on a valid verification.
  *
- * Cases 1 and 3-6 are buildable now against the merged alpha.16 code on `main`.
- * Cases 2 and 7 are gated on Agent Relay's confinement closure (OS-enforced boundary).
+ * Cases 1 and 3-7 are buildable now against the published alpha.16 code (case 7 is the federation
+ * serve-authority policy, offline). Cases 2 and 8 are gated on Agent Relay's confinement closure
+ * (the OS-enforced filesystem boundary).
  */
 
 import {
@@ -34,7 +36,7 @@ import {
 type Case = {
   id: string;
   claim: string;
-  expectedRefusal: string; // substring of error_reason / identity_status
+  expectedRefusal: string; // Ratify error_reason / identity_status, or the deployment-policy reason (federation)
   gated?: "confinement-closure";
 };
 
@@ -79,7 +81,7 @@ function refusalMatches(status: IdentityStatus, errorReason: string | undefined,
   return status === expected || (errorReason ?? "").includes(expected);
 }
 
-// 1. Scope escalation — the leaf claims files:write the root never held.
+// 1. Scope escalation: the leaf claims files:write the root never held.
 async function caseEscalation(): Promise<Outcome> {
   const chain = await buildChain({ rootScope: [SCOPE_FILES_READ, SCOPE_IDENTITY_DELEGATE], leafScope: [SCOPE_FILES_WRITE], label: "escalation" });
   const bundle = await buildBundle(chain.implAgent, chain.implPriv, chain.delegations, seed("escalation"), NOW);
@@ -96,7 +98,7 @@ async function caseEscalation(): Promise<Outcome> {
   return { id: "escalation", refused, controlOK, detail: `on=${on.identity_status} off=${off.identity_status}` };
 }
 
-// 3. Replay — a consumed single-use challenge is re-presented (MemoryChallengeStore).
+// 3. Replay: a consumed single-use challenge is re-presented (MemoryChallengeStore).
 async function caseReplay(): Promise<Outcome> {
   const chain = await buildChain({ label: "replay" });
   const store = new MemoryChallengeStore();
@@ -116,7 +118,7 @@ async function caseReplay(): Promise<Outcome> {
   return { id: "replay", refused, controlOK, detail: `first=${first.identity_status} replay=${replayed.identity_status} off=${off.identity_status}` };
 }
 
-// 4. Expired authority — a cert past expires_at. (Temporal check precedes liveness in the verifier.)
+// 4. Expired authority: a cert past expires_at. (Temporal check precedes liveness in the verifier.)
 async function caseExpired(): Promise<Outcome> {
   const expiresAt = T0 + 3600;
   const chain = await buildChain({ expiresAt, label: "expired" });
@@ -135,7 +137,7 @@ async function caseExpired(): Promise<Outcome> {
   return { id: "expired", refused, controlOK, detail: `on=${on.identity_status} off=${off.identity_status}` };
 }
 
-// 5. Revoked authority — the kill-switch as a standalone test.
+// 5. Revoked authority: the kill-switch as a standalone test.
 async function caseRevoked(): Promise<Outcome> {
   const chain = await buildChain({ label: "revoked" });
   const bundle = await buildBundle(chain.implAgent, chain.implPriv, chain.delegations, seed("revoked"), NOW);
@@ -154,7 +156,7 @@ async function caseRevoked(): Promise<Outcome> {
   return { id: "revoked", refused, controlOK, detail: `on=${on.identity_status} off=${off.identity_status}` };
 }
 
-// 6. Wrong-operation binding — a proof bound to operation A is presented for operation B.
+// 6. Wrong-operation binding: a proof bound to operation A is presented for operation B.
 async function caseWrongOperation(): Promise<Outcome> {
   const chain = await buildChain({ label: "wrong-op" });
   // The proof is cryptographically bound to operation A (session_context over its operation context).
@@ -174,12 +176,16 @@ async function caseWrongOperation(): Promise<Outcome> {
   return { id: "wrong-operation", refused, controlOK, detail: `on=${on.identity_status} off=${off.identity_status}` };
 }
 
-// 7. Federation — same-id-wrong-authority (the (a) two-deployment scene, article scene 3).
+// 7. Federation: same-id-wrong-authority (the (a) two-deployment scene, article scene 3).
 // A grant naming the SAME channel id under a DIFFERENT deployment authority than the verifier
 // serves is refused by the serve-authority policy, even though the delegation is cryptographically
-// valid — cross-deployment authority is legitimate (FEDERATION-NAMESPACE-RULE §2). The refusal is
+// valid. Cross-deployment authority is legitimate (FEDERATION-NAMESPACE-RULE §2). The refusal is
 // the namespace rule §3: a verifier refuses a resource under an <authority> it does not serve.
-// resource_id stays opaque to Ratify core; this is deployment/adapter policy, not a protocol change.
+//
+// IMPORTANT: this refusal is NOT a Ratify identity_status. The SDK returns authorized_agent; the
+// deployment/adapter refuses on its OWN serve-authority rule, with the policy reason
+// `unserved_authority`. resource_id stays opaque to Ratify core; this is deployment policy, not a
+// protocol change and not a value the verifier core emits.
 async function caseFederation(): Promise<Outcome> {
   const SERVED = CLIENT_DEPLOYMENT_AUTHORITY; // the deployment this verifier authoritatively serves
   const CHANNEL_ID = "206880000000000456"; // one numeric channel id...
@@ -192,25 +198,31 @@ async function caseFederation(): Promise<Outcome> {
   const bundle = await buildBundle(chain.implAgent, chain.implPriv, chain.delegations, seed("federation"), NOW);
   const ctx = buildVerificationContext("/", wrongHost);
 
-  // The delegation itself verifies — the crypto does not (and must not) reject cross-deployment authority.
+  // The delegation itself verifies. The crypto does not (and must not) reject cross-deployment authority.
   const verify = await verifyBundle(bundle, { required_scope: SCOPE_FILES_WRITE, context: ctx, now: NOW });
 
-  // Protection ON: this verifier serves SERVED — it accepts the right-host id and refuses the same
-  // id under the contractor authority.
+  // The deployment-policy decision, expressed as the adapter's refusal reason (NOT a Ratify status):
+  // empty string = accepted; "unserved_authority" = refused because the verifier does not serve
+  // that resource's deployment authority.
+  const policyReason = (rid: string, served: string): string =>
+    servesAuthority(rid, served) ? "" : "unserved_authority";
+
+  // Protection ON: this verifier serves SERVED, so it accepts the right-host id and refuses the same
+  // id under the contractor authority with reason `unserved_authority`.
   const refused =
     verify.valid &&
-    servesAuthority(rightHost, SERVED) &&   // correctly-hosted resource IS served
-    !servesAuthority(wrongHost, SERVED);    // same id under the other authority is REFUSED
+    policyReason(rightHost, SERVED) === "" &&                  // correctly-hosted resource IS served
+    policyReason(wrongHost, SERVED) === "unserved_authority";  // same id under the other authority is REFUSED
 
   // Negative control: a verifier that DOES serve the contractor authority accepts the very same
   // grant. Proves the refusal is the serve-authority policy, not the crypto and not a malformed id.
-  const controlOK = verify.valid && servesAuthority(wrongHost, CONTRACTOR_DEPLOYMENT_AUTHORITY);
+  const controlOK = verify.valid && policyReason(wrongHost, CONTRACTOR_DEPLOYMENT_AUTHORITY) === "";
 
   return {
     id: "federation",
     refused,
     controlOK,
-    detail: `verify=${verify.identity_status} serves(right)=${servesAuthority(rightHost, SERVED)} serves(wrong-here)=${servesAuthority(wrongHost, SERVED)}`,
+    detail: `verify=${verify.identity_status} policy(right)=served policy(wrong-here)=${policyReason(wrongHost, SERVED) || "served"}`,
   };
 }
 
@@ -241,7 +253,7 @@ export async function runAnnex(): Promise<{ refused: number; total: number }> {
 
   // Gated cases: SKIP loudly. They must NOT silently pass.
   for (const c of CASES.filter((c) => c.gated)) {
-    console.log(`annex   ${c.id}: SKIP (gated on C5 confinement closure — Agent Relay's OS-enforced filesystem boundary; see their ratify-demo confinement deliverable)`);
+    console.log(`annex   ${c.id}: SKIP (runs against Agent Relay's OS-enforced confinement adapter in the live engagement, not in this offline harness)`);
   }
 
   return { refused, total: runnable.length };
