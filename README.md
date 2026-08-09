@@ -17,8 +17,11 @@ Ratify is infrastructure here: it supplies the portable delegated-authority proo
 ```
 npm ci
 npm run engagement    # replays the engagement scenes (delegation, handoff, the federation beat, the work +
-                      # receipts, the kill switch), writes evidence/, re-verifies every bundle + receipt
-                      # offline, runs the adversarial annex, prints: "engagement: N/N verified, M/M refused"
+                      # receipts, the kill switch), re-verifies every committed bundle + receipt offline,
+                      # runs the adversarial annex, prints: "engagement: N/N verified, M/M refused".
+                      # Never modifies evidence/ — a verification run leaves the clone clean.
+npm run evidence      # same run, but regenerates evidence/ first (--write-evidence). Signature bytes
+                      # differ on every regeneration (hedged ML-DSA); commit the result deliberately.
 npm run typecheck     # tsc --noEmit
 ```
 Offline by default. No call to either company. A reader reproduces every claim with the open SDKs.
