@@ -63,19 +63,19 @@ export function emptySig(): HybridSignature {
 
 /** Derive a deterministic demo hybrid keypair from a fixed label. */
 export async function demoKeypair(label: string) {
-  const edSeed = sha256(new TextEncoder().encode(`ratify-demo-ed25519:${label}`));
-  const mlSeed = sha256(new TextEncoder().encode(`ratify-demo-mldsa65:${label}`));
+  const edSeed = sha256(new TextEncoder().encode(`ratify-engagement-ed25519:${label}`));
+  const mlSeed = sha256(new TextEncoder().encode(`ratify-engagement-mldsa65:${label}`));
   return hybridKeypairFromSeeds(edSeed, mlSeed);
 }
 
 /** A deterministic 32-byte challenge from a fixed label (offline stand-in for a verifier nonce). */
 export function deterministicChallenge(label: string): Uint8Array {
-  return sha256(new TextEncoder().encode(`ratify-demo-challenge:${label}`));
+  return sha256(new TextEncoder().encode(`ratify-engagement-challenge:${label}`));
 }
 
 /** A deterministic synthetic 40-hex commit sha (offline stand-in for a git commit). */
 export function syntheticSha(label: string): string {
-  const h = sha256(new TextEncoder().encode(`ratify-demo-commit:${label}`));
+  const h = sha256(new TextEncoder().encode(`ratify-engagement-commit:${label}`));
   let out = "";
   for (const b of h.slice(0, 20)) out += b.toString(16).padStart(2, "0");
   return out;
