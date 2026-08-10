@@ -52,6 +52,7 @@ import {
   type Chain,
 } from "./harness.js";
 import { runAnnex } from "../adversarial/annex.js";
+import { issueCheckpoint, verifyCheckpoint, type EvidenceCheckpoint } from "./checkpoint.js";
 
 const EVIDENCE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "evidence");
 
@@ -287,6 +288,18 @@ async function scene5_publish_and_reverify(chain: Chain, claims: Claim[]): Promi
   const revoked = new Set(manifest.revoked_certs);
   const revocation = new SetRevocationProvider(revoked);
 
+  const manifestBytes = new Uint8Array(await readFile(join(EVIDENCE_DIR, "manifest.json")));
+  const headEntry = manifest.claims[manifest.claims.length - 1];
+  if (!headEntry) throw new Error("evidence manifest has no claims");
+  const headReceiptBytes = new Uint8Array(await readFile(join(EVIDENCE_DIR, "receipts", `${headEntry.label}.json`)));
+  const checkpoint = JSON.parse(await readFile(join(EVIDENCE_DIR, "checkpoint.json"), "utf8")) as EvidenceCheckpoint;
+  const checkpointSigner = (await demoKeypair("verifier")).publicKey;
+  const checkpointErr = checkpoint.claim_count === manifest.claims.length
+    ? await verifyCheckpoint(checkpoint, manifestBytes, headReceiptBytes, checkpointSigner)
+    : "claim count mismatch";
+  if (checkpointErr !== null) throw new Error(`evidence checkpoint invalid: ${checkpointErr}`);
+  console.log(`replay  checkpoint: signature=ok manifest=bound head=bound claims=${checkpoint.claim_count} OK`);
+
   let verified = 0;
   let total = 0;
   let prevReceiptHash: Uint8Array | null = null;
@@ -373,7 +386,14 @@ async function writeEvidence(chain: Chain, claims: Claim[]): Promise<void> {
       revoked: c.revoked,
     })),
   };
-  await writeFile(join(EVIDENCE_DIR, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+  const manifestBytes = new TextEncoder().encode(JSON.stringify(manifest, null, 2) + "\n");
+  await writeFile(join(EVIDENCE_DIR, "manifest.json"), manifestBytes);
+  const head = claims[claims.length - 1];
+  if (!head) throw new Error("cannot checkpoint an empty evidence trail");
+  const headReceiptBytes = new TextEncoder().encode(encodeVerificationReceipt(head.receipt) + "\n");
+  const verifier = await demoKeypair("verifier");
+  const checkpoint = await issueCheckpoint(manifestBytes, headReceiptBytes, claims.length, head.verifiedAt, verifier.publicKey, verifier.privateKey);
+  await writeFile(join(EVIDENCE_DIR, "checkpoint.json"), JSON.stringify(checkpoint, null, 2) + "\n");
 }
 
 // ---------------------------------------------------------------------------
