@@ -13,6 +13,8 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run typecheck
+      - name: Checkpoint detects mutation, deletion, reordering, truncation and re-signing
+        run: npm run checkpoint-test
       - name: Reproduce the engagement against the committed evidence
         run: npm run engagement
       - name: Verification must leave the tree clean
