@@ -6,7 +6,7 @@
 
 ## What this repo is
 - The one-command reproduction of the engagement (`npm run engagement`), offline, exits non-zero if any published claim fails to re-verify.
-- The published evidence trail: the delegation chain, every `ProofBundle`, and the `VerificationReceipt` chain, committed under `evidence/`.
+- The published evidence trail: the delegation chain, every `ProofBundle`, the `VerificationReceipt` chain, and a verifier-signed head checkpoint committed under `evidence/`.
 - The adversarial annex (`adversarial/`): runnable failing tests a skeptic can run.
 
 ## What this repo is not
