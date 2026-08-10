@@ -17,6 +17,37 @@ Each lane checks, per claim:
 The C lane covers checks 1 and 2 only; the current C FFI surface does not expose the two
 binding accessors. Those checks are covered by the other four lanes over the same bytes.
 
+## The head checkpoint
+
+The four checks above are per claim. They catch a mutated receipt and a receipt deleted
+from the middle, because both break a `prev_hash` link. They do not catch truncation of
+the newest entries: a chain with its tail removed is still internally consistent, and the
+manifest listing the claims would be trimmed to match.
+
+`evidence/checkpoint.json` closes that. It binds the exact bytes of `evidence/manifest.json`,
+the bytes of the final receipt, the ordered claim count, an evidence-set identifier and a
+timestamp, signed by the verifier key. `npm run engagement` verifies it before checking any
+claim, and the detection cases run on their own:
+
+```
+npm run checkpoint-test
+```
+
+**What the checkpoint is worth depends on where its signer comes from.** A checkpoint
+carries its own signer's public key, so anyone able to rewrite the evidence can re-sign a
+fresh checkpoint over the rewritten version and it will verify against itself. So
+verification takes the expected signer as an argument and refuses a checkpoint signed by
+anything else. For live evidence, the signed head must be published outside this repository
+so the pinned value does not come from the artifact it attests. `checkpoint-test` covers
+both halves: unpinned, a re-signed forgery verifies; pinned, it is refused.
+
+Offline, the pinned signer is the deterministic demo verifier key, so the pin is circular
+by construction. That is the correct property for a reproducible model, and it is the
+reason the offline evidence set proves reproducibility rather than authenticity. The live
+run will sign with a real deployment verifier key whose private half never enters this
+repository, and its signed head will be published separately. Until both conditions are
+satisfied, the live evidence must not be described as tamper-evident end to end.
+
 ## TypeScript (npm `@identities-ai/ratify-protocol`)
 
 ```
