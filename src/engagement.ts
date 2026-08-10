@@ -18,6 +18,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   SCOPE_FILES_WRITE,
+  SCOPE_IDENTITY_DELEGATE,
   bundleHash,
   decodeProofBundle,
   decodeVerificationReceipt,
@@ -97,7 +98,11 @@ async function scene1_delegation(): Promise<Chain> {
     { required_scope: SCOPE_FILES_WRITE, context: buildVerificationContext("/docs/getting-started.md"), now: verifyAt(0) },
   );
   assert(r.valid && r.identity_status === "authorized_agent", `scene1 delegation should verify, got ${r.identity_status}: ${r.error_reason}`);
-  console.log(`scene1  delegation issued: scope=[files:write] resource_path={${TARGET_RESOURCE_ID}, /docs} (revocable, expires_at short)`);
+  // The printed scope is read off the cert rather than written by hand, because this line is
+  // quoted in the write-up. It said [files:write] while the cert carried identity:delegate
+  // too, so the narration disagreed with the evidence it was narrating.
+  assert(chain.rootCert.scope.includes(SCOPE_IDENTITY_DELEGATE), "root cert must carry identity:delegate, or scene 2 cannot narrow");
+  console.log(`scene1  delegation issued: scope=[${chain.rootCert.scope.join(", ")}] resource_path={${TARGET_RESOURCE_ID}, /docs} (revocable, expires_at short)`);
   return chain;
 }
 
