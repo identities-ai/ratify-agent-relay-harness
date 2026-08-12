@@ -46,7 +46,7 @@ export const BOUND_PATH_PREFIX = "/docs";
 // `relay:v1:<authority>:<type>:<id>`. They are globally unique at a moment, so two
 // deployments cannot mint colliding identifiers (RELAY-IDENTIFIER-PROFILE requirement #1).
 export const CLIENT_DEPLOYMENT_AUTHORITY = "relay.ratifyprotocol.com";
-export const CONTRACTOR_DEPLOYMENT_AUTHORITY = "cast.agentrelay.com";
+export const CONTRACTOR_DEPLOYMENT_AUTHORITY = "ratify.agentrelay.com";
 
 // A single fixed base time so every committed artifact is byte-deterministic.
 // 2023-11-14T22:13:20Z. Injectable everywhere `now` is needed.
