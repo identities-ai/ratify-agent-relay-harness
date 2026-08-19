@@ -6,7 +6,18 @@
 
 ## What this repo is
 - The one-command reproduction of the engagement (`npm run engagement`), offline, exits non-zero if any published claim fails to re-verify.
-- The published evidence trail: the delegation chain, every `ProofBundle`, the `VerificationReceipt` chain, and a verifier-signed head checkpoint committed under `evidence/`.
+- The published evidence trail for that offline run: the delegation chain, every `ProofBundle`, the `VerificationReceipt` chain, and a verifier-signed head checkpoint committed under `evidence/`.
+
+## The offline model and the live run are different things
+
+Everything under `evidence/` is a **synthetic model** of the engagement, built so that someone with neither deployment can run it. Its identifiers are fixtures: `demo-cert-root`, a demo channel id, fixed timestamps. Nothing in here is a certificate that was issued during the live sessions of 18 and 19 August 2026.
+
+That is deliberate. This repository answers "does the mechanism behave as described", offline and on any machine. It does not, on its own, evidence that a particular thing happened on a particular day.
+
+Two consequences worth stating plainly:
+
+- **The head checkpoint exists here and did not exist in the live run.** The offline model produces one, and `npm run checkpoint-test` exercises truncation detection against it. The live engagement produced no signed head. Do not read the checkpoint in `evidence/` as an artifact of those sessions.
+- **The live run's certificates, receipts, deployment decisions and logs are published separately**, and are what to check if the question is what happened on those days rather than how the mechanism behaves.
 - The adversarial annex (`adversarial/`): runnable failing tests a skeptic can run.
 
 ## What this repo is not
