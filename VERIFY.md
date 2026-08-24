@@ -1,7 +1,7 @@
 # Verify the evidence trail with any of the five SDKs
 
 The committed evidence under `evidence/` is the claim. Everything below re-verifies it
-offline against the published `v1.0.0-alpha.16` release of the Ratify protocol SDKs: no
+offline against the published `v1.0.0-alpha.17` release of the Ratify protocol SDKs: no
 call to either company, no trust in this repository's own code required.
 
 Claim labels: `commit-1`, `commit-2`, `commit-3`, `killswitch`.
@@ -69,7 +69,7 @@ go run . commit-1     # one claim
 ```
 cd verify/python
 python3 -m venv .venv
-./.venv/bin/pip install "ratify-protocol==1.0.0a16"
+./.venv/bin/pip install "ratify-protocol==1.0.0a17"
 ./.venv/bin/python verify_one.py              # all claims
 ./.venv/bin/python verify_one.py commit-1     # one claim
 ```
@@ -84,7 +84,7 @@ cargo run --release commit-1      # one claim
 
 ## C (built from the SDK source)
 
-Clone `github.com/identities-ai/ratify-protocol` (tag `v1.0.0-alpha.16`) as a sibling of
+Clone `github.com/identities-ai/ratify-protocol` (tag `v1.0.0-alpha.17`) as a sibling of
 this repository, build the C SDK (`cargo build --release` in `sdks/c`), then follow the
 build command in the header of `verify/c/verify_one.c`.
 

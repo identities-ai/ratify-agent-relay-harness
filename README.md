@@ -36,7 +36,7 @@ npm run evidence      # same run, but regenerates evidence/ first (--write-evide
 npm run typecheck     # tsc --noEmit
 ```
 Offline by default. No call to either company. A reader reproduces every claim with the open SDKs.
-All dependencies pin the published `v1.0.0-alpha.16` release: npm `@identities-ai/ratify-protocol`, the Go module tag, crates.io `ratify-protocol`, and PyPI `ratify-protocol==1.0.0a16`.
+All dependencies pin the published `v1.0.0-alpha.17` release: npm `@identities-ai/ratify-protocol`, the Go module tag, crates.io `ratify-protocol`, and PyPI `ratify-protocol==1.0.0a17`.
 
 Determinism: keys, IDs, scopes, constraints, challenges, timestamps and decisions are deterministic (fixed demo seeds + a fixed time base). The ML-DSA-65 half of each hybrid signature is *hedged* by the pinned `@noble/post-quantum`, so raw signature bytes differ between generations while every signature still verifies. See `VERIFY.md`.
 

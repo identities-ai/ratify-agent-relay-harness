@@ -1,6 +1,6 @@
 github.com/cloudflare/circl v1.6.3 h1:9GPOhQGF9MCYUeXyMYlqTR6a5gTrgR/fBLXvUgtVcg8=
 github.com/cloudflare/circl v1.6.3/go.mod h1:2eXP6Qfat4O/Yhh8BznvKnJ+uzEoTQ6jVKJRn81BiS4=
-github.com/identities-ai/ratify-protocol v1.0.0-alpha.16 h1:0DeETAE1h+0vg3VRE6iQbDQvpsj83D8BWiveP3x9zyM=
-github.com/identities-ai/ratify-protocol v1.0.0-alpha.16/go.mod h1:Mfv64Wwyl32DmUpGpPqfxJKMthe+LzKtO9sTagz5ORQ=
+github.com/identities-ai/ratify-protocol v1.0.0-alpha.17 h1:+RGx8tMk2/mjL0Hi/WWs9PkKQi5BVbIFIbej8GMN3lM=
+github.com/identities-ai/ratify-protocol v1.0.0-alpha.17/go.mod h1:Mfv64Wwyl32DmUpGpPqfxJKMthe+LzKtO9sTagz5ORQ=
 golang.org/x/sys v0.28.0 h1:Fksou7UEQUWlKvIdsqzJmUmCX3cZuD2+P3XyyzwMhlA=
 golang.org/x/sys v0.28.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=

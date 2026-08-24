@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@identities-ai/ratify-protocol": "1.0.0-alpha.16",
+    "@identities-ai/ratify-protocol": "1.0.0-alpha.17",
     "@noble/hashes": "^1.5.0"
   },
   "devDependencies": {
