@@ -1,0 +1,5 @@
+adapter-1  | 2026-08-13T19:33:29.583423001Z [borealis] worker   ef15635f6e8a23e786e218b75552203c
+adapter-1  | 2026-08-13T19:33:29.584230845Z [borealis] verifier 1092624d911effc1d9eb70198b7fac34
+adapter-1  | 2026-08-13T19:33:29.584351519Z [borealis] serves   relay.ratifyprotocol.com
+adapter-1  | 2026-08-13T19:33:29.823292854Z [borealis] registered ratify_challenge, ratify_identity, ratify_present, ratify_revoke, ratify_task, ratify_open_session, ratify_turn, ratify_turn_stats
+adapter-1  | 2026-08-13T19:33:29.823358345Z [borealis] waiting for proofed handoffs
