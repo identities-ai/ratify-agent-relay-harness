@@ -41,7 +41,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install "ratify-protocol==1.0.0a16"
+      # pqcrypto 1.0.0 (2026-08-15) changed ML-DSA-65 behaviour and every signature
+      # fails against it. ratify-protocol 1.0.0a16 declares pqcrypto>=0.3.4 with no
+      # upper bound, so a fresh install picks up the break. Pinned here until the SDK
+      # ships a constrained release.
+      - run: pip install "ratify-protocol==1.0.0a16" "pqcrypto==0.4.0"
       - run: python verify_one.py
         working-directory: verify/python
   verify-rust:
