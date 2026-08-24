@@ -1,0 +1,84 @@
+relaycast-1  | 2026-08-18T18:22:03.318085059Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:22:03.318470381Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:22:03.318485933Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:22:03.318493260Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:22:03.318500024Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:22:03.318506573Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:22:03.318513011Z }
+relaycast-1  | 2026-08-18T18:22:33.686587786Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:22:33.686635998Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:22:33.686827695Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:22:33.686835395Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:22:33.686840976Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:22:33.686846690Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:22:33.686852462Z }
+relaycast-1  | 2026-08-18T18:23:03.693330033Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:23:03.694260207Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:23:03.694331708Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:23:03.694338911Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:23:03.694345600Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:23:03.694352225Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:23:03.694358628Z }
+relaycast-1  | 2026-08-18T18:23:33.705308735Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:23:33.705352699Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:23:33.705361156Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:23:33.705368096Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:23:33.705375234Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:23:33.705381882Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:23:33.705387966Z }
+relaycast-1  | 2026-08-18T18:24:03.704204785Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:24:03.704277415Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:24:03.704285789Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:24:03.704292354Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:24:03.704299112Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:24:03.704305004Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:24:03.704311230Z }
+relaycast-1  | 2026-08-18T18:24:33.706354510Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:24:33.706415915Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:24:33.706424621Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:24:33.706432179Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:24:33.706439431Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:24:33.706446610Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:24:33.706454000Z }
+relaycast-1  | 2026-08-18T18:25:03.710584029Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:25:03.710651405Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:25:03.710659278Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:25:03.710665314Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:25:03.710671489Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:25:03.710678249Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:25:03.710725088Z }
+relaycast-1  | 2026-08-18T18:25:33.718643525Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:25:33.718695912Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:25:33.718702357Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:25:33.718707602Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:25:33.718712744Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:25:33.718717859Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:25:33.718723195Z }
+relaycast-1  | 2026-08-18T18:26:03.727116299Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:26:03.728165776Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:26:03.728197324Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:26:03.728204959Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:26:03.728211988Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:26:03.728258756Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:26:03.728266173Z }
+relaycast-1  | 2026-08-18T18:26:33.733108324Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:26:33.734249770Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:26:33.734271531Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:26:33.734313733Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:26:33.734321624Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:26:33.734328640Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:26:33.734335396Z }
+relaycast-1  | 2026-08-18T18:27:03.736029250Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:27:03.736137840Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:27:03.736147028Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:27:03.736154875Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:27:03.736162088Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:27:03.736169258Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:27:03.736176411Z }
+relaycast-1  | 2026-08-18T18:27:33.745869568Z [delivery.route] provider not delivery-ready; delivery deferred {
+relaycast-1  | 2026-08-18T18:27:33.745923832Z   workspace_id: '213132905406537728',
+relaycast-1  | 2026-08-18T18:27:33.745932240Z   node_id: 'node_direct_213397637246918656',
+relaycast-1  | 2026-08-18T18:27:33.745939289Z   provider_name: 'default',
+relaycast-1  | 2026-08-18T18:27:33.745945917Z   agent_id: '213397637246918656',
+relaycast-1  | 2026-08-18T18:27:33.745952660Z   delivery_id: 'del_215535733371478016'
+relaycast-1  | 2026-08-18T18:27:33.745959013Z }
