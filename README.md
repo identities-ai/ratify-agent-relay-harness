@@ -1,18 +1,41 @@
 # Agent Relay × Ratify: Phase 2 engagement (reproduction repo)
 
-One company's agents did real work in another company's repository on 18 and 19 August 2026, under authority that was granted narrowly, narrowed again when it was passed on, and revoked while the work was still running. This repository lets you replay that offline and check it yourself.
+On 18 and 19 August 2026, one company's digital workers did real work in another company's
+repository, under authority that was granted narrowly, narrowed again when it was passed on,
+and revoked while the work was still running. This repository replays that offline so you can
+check it rather than take it.
 
 ```
 npm ci && npm run engagement
 ```
 
-Exits non-zero if any published claim fails to re-verify. A clean run prints `engagement: 8/8 verified, 6/6 refused`.
+A clean run prints `engagement: 8/8 verified, 6/6 refused`, and exits non-zero if any
+published claim fails to re-verify. No network call to either company.
 
-**The write-ups.** [Agent Relay's account of the run](https://agentrelay.com/blog/someone-elses-agent-in-your-repo), and [the full engagement record](https://ratifyprotocol.com/writing/agent-relay-phase2-technical-note) with every certificate, timestamp and limitation.
+**What Ratify is.** An open protocol for delegated authority that is bounded to a named
+resource, revocable while work is in flight, and verifiable offline by the party receiving
+it. The receiving side checks who authorized what, for how long, and whether it still stands,
+without calling the party that issued it.
 
-This is the Ratify-Protocol-side reproduction harness and adversarial annex. It orchestrates an engagement that runs on [Agent Relay](https://agentrelay.com)'s adapter and confinement; it does not reimplement them. The path-traversal and two-principal-isolation cases are enforced by Agent Relay's OS-level confinement adapter in the real engagement, not by this offline harness, so they SKIP here and the annex reads six refusals rather than eight.
+| | |
+|---|---|
+| Protocol and spec | [identities-ai/ratify-protocol](https://github.com/identities-ai/ratify-protocol) |
+| SDKs, five languages | [sdks/](https://github.com/identities-ai/ratify-protocol/tree/main/sdks) |
+| How to verify by hand | [VERIFY.md](VERIFY.md) |
+| Live evidence, client half | [`evidence-live-2026-08/client/`](evidence-live-2026-08/client) |
+| Live evidence, contractor half | [AgentWorkforce/ratify-agent-relay-evidence](https://github.com/AgentWorkforce/ratify-agent-relay-evidence) |
+| Agent Relay's account of the run | [Someone else's agent in your repo](https://agentrelay.com/blog/someone-elses-agent-in-your-repo) |
+| The full engagement record | [Phase 2 technical note](https://ratifyprotocol.com/writing/agent-relay-phase2-technical-note) |
 
-[Ratify](https://ratifyprotocol.com) is infrastructure here: it supplies the portable delegated-authority proof. Agent Relay coordinates the work and enforces the filesystem boundary.
+This is the Ratify-Protocol-side reproduction harness and adversarial annex. It orchestrates
+an engagement that runs on [Agent Relay](https://agentrelay.com)'s adapter and confinement; it
+does not reimplement them. The path-traversal and two-principal-isolation cases need two OS
+principals with distinct uids inside that confinement boundary, and the adapter runs as a
+single unprivileged uid, so they SKIP here and the annex reads six refusals rather than eight.
+The write-up says why rather than quietly reporting eight.
+
+If any of this is useful, star the repository, and tell us which authority boundary you would
+want tested next.
 
 ## What this repo is
 - The one-command reproduction of the engagement (`npm run engagement`), offline, exits non-zero if any published claim fails to re-verify.
