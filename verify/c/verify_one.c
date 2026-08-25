@@ -19,7 +19,7 @@
  * evidence/manifest.json byte-for-byte.
  *
  * The include/library paths below assume a checkout of
- * github.com/identities-ai/ratify-protocol (tag v1.0.0-alpha.16) cloned as a
+ * github.com/identities-ai/ratify-protocol (tag v1.0.0-alpha.17) cloned as a
  * sibling of this repository.
  *
  * Build (macOS), from verify/c/ after `cargo build --release` in the C SDK:

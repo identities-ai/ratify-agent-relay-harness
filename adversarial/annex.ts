@@ -6,7 +6,7 @@
  * deterministic Ratify error_reason / identity_status, except the federation case, whose refusal
  * is a deployment serve-authority policy decision layered on a valid verification.
  *
- * Cases 1 and 3-7 are buildable now against the published alpha.16 code (case 7 is the federation
+ * Cases 1 and 3-7 are buildable now against the published alpha.17 code (case 7 is the federation
  * serve-authority policy, offline). Cases 2 and 8 are gated on Agent Relay's confinement closure
  * (the OS-enforced filesystem boundary).
  */
