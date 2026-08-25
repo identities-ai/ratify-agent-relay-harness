@@ -1,12 +1,23 @@
 # Agent Relay × Ratify: Phase 2 engagement (reproduction repo)
 
-**Status:** the offline half runs end to end (`npm run engagement`, exit 0). This is the Ratify-Protocol-side reproduction harness and adversarial annex for the Phase 2 flagship. It orchestrates and publishes an engagement that runs on [Agent Relay](https://agentrelay.com)'s adapter + confinement; it does not reimplement them. The fully-enforced path-traversal and two-principal-isolation cases are enforced by Agent Relay's OS-level confinement adapter in the real engagement, not by this offline harness; they SKIP here.
+One company's agents did real work in another company's repository on 18 and 19 August 2026, under authority that was granted narrowly, narrowed again when it was passed on, and revoked while the work was still running. This repository lets you replay that offline and check it yourself.
+
+```
+npm ci && npm run engagement
+```
+
+Exits non-zero if any published claim fails to re-verify. A clean run prints `engagement: 8/8 verified, 6/6 refused`.
+
+**The write-ups.** [Agent Relay's account of the run](https://agentrelay.com/blog/someone-elses-agent-in-your-repo), and [the full engagement record](https://ratifyprotocol.com/writing/agent-relay-phase2-technical-note) with every certificate, timestamp and limitation.
+
+This is the Ratify-Protocol-side reproduction harness and adversarial annex. It orchestrates an engagement that runs on [Agent Relay](https://agentrelay.com)'s adapter and confinement; it does not reimplement them. The path-traversal and two-principal-isolation cases are enforced by Agent Relay's OS-level confinement adapter in the real engagement, not by this offline harness, so they SKIP here and the annex reads six refusals rather than eight.
 
 [Ratify](https://ratifyprotocol.com) is infrastructure here: it supplies the portable delegated-authority proof. Agent Relay coordinates the work and enforces the filesystem boundary.
 
 ## What this repo is
 - The one-command reproduction of the engagement (`npm run engagement`), offline, exits non-zero if any published claim fails to re-verify.
 - The published evidence trail for that offline run: the delegation chain, every `ProofBundle`, the `VerificationReceipt` chain, and a verifier-signed head checkpoint committed under `evidence/`.
+- The adversarial annex (`adversarial/`): runnable failing tests a skeptic can run.
 
 ## The offline model and the live run are different things
 
@@ -17,8 +28,7 @@ That is deliberate. This repository answers "does the mechanism behave as descri
 Two consequences worth stating plainly:
 
 - **The head checkpoint exists here and did not exist in the live run.** The offline model produces one, and `npm run checkpoint-test` exercises truncation detection against it. The live engagement produced no signed head. Do not read the checkpoint in `evidence/` as an artifact of those sessions.
-- **The live run's certificates, receipts, deployment decisions and logs are published separately**, and are what to check if the question is what happened on those days rather than how the mechanism behaves.
-- The adversarial annex (`adversarial/`): runnable failing tests a skeptic can run.
+- **The live run's certificates, receipts, deployment decisions and logs are published separately.** The client's half is in this repository under `evidence-live-2026-08/client/`. Agent Relay publishes theirs at [`AgentWorkforce/ratify-agent-relay-evidence`](https://github.com/AgentWorkforce/ratify-agent-relay-evidence). Checking the crossing needs both halves; either alone evidences only what its own side did.
 
 ## What this repo is not
 - Not the target repo. The delegation is bound to `/docs` of a separate public repo, `identities-ai/ratify-agent-relay-engagement`.
